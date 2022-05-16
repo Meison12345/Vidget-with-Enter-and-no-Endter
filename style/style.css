@@ -52,6 +52,12 @@ li {
 .innerElem {
   padding: 10px 0px 10px 7px;
   pointer-events: auto;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  background: white;
+  cursor: pointer;
 }
 
 .active {
@@ -209,29 +215,5 @@ li {
   border: none;
   position: absolute;
   border-bottom: 1px solid red;
-}
-
-.dropMenu-elem-color {
-  pointer-events: none;
-}
-
-.dropMenu-elem:hover .dropMenu-elem-color {
-  background-color: red;
-}
-
-.dropMenu-elem-color:first-child {
-  background-color: #CCC8F7;
-}
-
-.dropMenu-elem-color:nth-child(2) {
-  background-color: #DCECFF;
-}
-
-.dropMenu-elem-color:nth-child(3) {
-  background-color: #FFF3B4;
-}
-
-.dropMenu-elem-color:last-child {
-  background-color: #EBFFB5;
 }
 /*# sourceMappingURL=style.css.map */
