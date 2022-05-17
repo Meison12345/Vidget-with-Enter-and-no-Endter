@@ -82,7 +82,6 @@ function liveSearch() {
     $textInsert.on('keyup', function (e) {
         let value = $('.shadow-inp').val();
         let list = $('.innerElem');
-        console.log(value);
         if (value != '') {
             list.each(function (par, elem) {
                 if ($(elem).text().toLowerCase().search(value) == -1) {
@@ -123,7 +122,7 @@ function generateEmojiIcon(data, dataAttr) {
 
 $body.on('keydown', function (e) {
     if (e.key === 'Escape') {
-        $('.dropMenu').addClass('active');
+        $dropMenu.addClass('active');
         $('.keyboardShortcut').removeClass('keyboardShortcut-active');
         $('.shadow-inp').remove();
     }
@@ -131,12 +130,18 @@ $body.on('keydown', function (e) {
 
 $textInsert.on('keydown', function (e) {
     modifyInputs();
+    if ((e.key === 'Backspace' || e.key === 'Delete') && $('.shadow-inp').length >= 1 && $('.shadow-inp').val().length < 1) {
+        e.preventDefault();
+        $('.shadow-inp').remove();
+        $dropMenu.addClass('active');
+        $textInsert.focus();
+    }
     if (e.key === 'Enter') {
         e.preventDefault();
     }
     if (e.key === '[') {
         e.preventDefault();
-        $('.dropMenu').removeClass('active');
+        $dropMenu.removeClass('active');
         if (($('.shadow-inp').length < 1)) {
             let sel, range;
             if (window.getSelection) {
@@ -165,8 +170,8 @@ $textInsert.on('keydown', function (e) {
                     }
                     $('.shadow-inp').focus();
                     // setTimeout(() => {
-                        liveSearch();
-                        resizeObserver.observe($('.shadow-inp')[0]);
+                    liveSearch();
+                    resizeObserver.observe($('.shadow-inp')[0]);
                     // }, 0);
                 }
             } else if (document.selection && document.selection.type != "Control") {
@@ -178,7 +183,6 @@ $textInsert.on('keydown', function (e) {
 
 $dropMenu.on('click', '.innerElem', function (e) {
     const $current = e.currentTarget;
-    console.log(e.currentTarget);
     $dropMenu.addClass('active');
     $('.shadow-inp').before($(`<span class="spanHide" style="display:none" contenteditable="false">${$($current).attr('data-id')}</span>`));
     $('.shadow-inp').remove();
@@ -204,11 +208,11 @@ $(document).on('click', function (e) {
 });
 
 for (const key in masDropMenu) {
-    $('.dropMenu-nav').append(generateHeaderTitle(key));
+    $dropMenuNav.append(generateHeaderTitle(key));
     for (const value in masDropMenu[key]) {
         const val = value.replace('|', ' → ');
         const dataAttr = (masDropMenu[key][value]);
-        $('.dropMenu-nav').append(generateEmojiIcon(val, dataAttr));
+        $dropMenuNav.append(generateEmojiIcon(val, dataAttr));
     }
 }
 
@@ -245,7 +249,7 @@ $('.modal-win-text-field').on('input', () => {
         }
     });
 
-    $('.dropMenu-nav').on('click mouseenter', function (e) {
+    $dropMenuNav.on('click mouseenter', function (e) {
         setTimeout(() => {
             const val = $('.modal-win-text-field').text();
             $('textarea[name="out-data-final"]').val(val);
@@ -310,7 +314,7 @@ const values = {
         'Покупатель|Ответственный': '{{customer.responsible.name}}'
     }
 }
-
+let item, name;
 const res = '<p class="text-field">&nbsp;' + exitData.map(el => {
     if (!reg.test(el)) {
         return el;
@@ -318,8 +322,7 @@ const res = '<p class="text-field">&nbsp;' + exitData.map(el => {
     const id = el.replace(/\{\{|\}\}/g, '');
     for (let el in values) {
         for (let key in values[el]) {
-            // console.log(values[el][key])
-            var item = values[el][key];
+            item = values[el][key];
         }
     }
     if (!item) return el;
@@ -327,8 +330,7 @@ const res = '<p class="text-field">&nbsp;' + exitData.map(el => {
         for (let key in values[elem]) {
             // key = key.replace('|', ' → ');
             if (el == values[elem][key]) {
-                var name = key.replace('|', ' → ');;
-                console.log(values[elem][key]);
+                name = key.replace('|', ' → ');;
             }
         }
     }
@@ -338,7 +340,7 @@ const res = '<p class="text-field">&nbsp;' + exitData.map(el => {
 $('.modal-win-text-field').html(res);
 modifyInputs();
 
-$('.modal-win-text-field').trigger('input');
+$textInsert.trigger('input');
 //
 
 
