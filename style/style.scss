@@ -201,23 +201,33 @@ li {
     width: 35%;
     outline: none;
     border: none;
-    position: absolute;
+    // position: absolute;
     border-bottom: 1px solid red;
 }
 
-// .dropMenu-elem-color {
-//     pointer-events: none;
+.dropMenu-elem-color {
+    pointer-events: none;
+}
+
+// .dropMenu-nav {
+//     &-elem-color:last-child {
+//         background-color: #DCECFF;
+//     }
 // }
 
-// .dropMenu-elem:hover .dropMenu-elem-color {
+// .dropMenu-elem input:hover .dropMenu-elem-color {
 //     background-color: red;
 // }
 
-// .dropMenu-elem-color:first-child {
+.innerElem:hover{
+    background:#efefef; 
+}
+
+// li > .dropMenu-elem-color:first-child {
 //     background-color: #CCC8F7;
 // }
 
-// .dropMenu-elem-color:nth-child(2) {
+// li > .dropMenu-elem-color:nth-child(2) {
 //     background-color: #DCECFF;
 // }
 
