@@ -8,7 +8,7 @@ const $outData = $('#out-data');
 const $keyboard = $('.keyboardShortcut');
 const $body = $('body');
 const $keyboardImg = $('.keyboard');
-const $shadowInp = $(`<input type="text" class="shadow-inp" name="searchField" style="position: sticky; width: 77px;">`);
+const $shadowInp = $(`<input type="text" class="shadow-inp" name="searchField">`);
 const masColor = ['#CCC8F7', '#DCECFF', '#FFF3B4', '#EBFFB5'];
 const masDropMenu = {
     Сделка: {
@@ -52,8 +52,9 @@ function pasteHtmlAtCaret(html) {
             while ((node = el.firstChild)) {
                 lastNode = frag.appendChild(node);
             }
+            $('.shadow-inp').focus();
+            // console.log(el, el.firstChild, frag, node, lastNode);
             range.insertNode(frag);
-
             if (lastNode) {
                 range = range.cloneRange();
                 range.setStartAfter(lastNode);
@@ -69,42 +70,45 @@ function pasteHtmlAtCaret(html) {
 }
 
 function modifyInputs() {
-    $('.modal-win-text-field').find('input').each((_, el) => {
+    $('.modal-win-text-field').find('.li-elem').each((_, el) => {
         const $current = $(el);
-        const value = $current.attr('data-val');
+        // const value = $current.attr('data-val');
+        $current.css('width', 0);
+        // $current.attr('value', value);
+        // console.log($current.css('width'));
+        console.log(el.scrollWidth);
 
-        $current.attr('value', value);
         $current.css('width', (el.scrollWidth) + 'px');
     });
 }
-
+/**
+ * @description Живой поиск принажатии на '[' 
+ */
 function liveSearch() {
-    try {
-        $textInsert.on('keyup', function (e) {
-            let value = $('.shadow-inp')[0].value;
-            let list = $('.innerElem');
-            if (value != '') {
-                list.each(function (par, elem) {
-                    if ($(elem).text().toLowerCase().search(value) == -1) {
-                        $(elem).addClass('hide');
-                    } else {
-                        $(elem).removeClass('hide');
-                    }
-                });
-            } else {
-                list.each(function (par, elem) {
+    $textInsert.on('keydown', function (e) {
+        let value = $('.shadow-inp').val();
+        let list = $('.innerElem');
+        if (value != '') {
+            list.each(function (par, elem) {
+                if ($(elem).text().toLowerCase().search(value) == -1) {
+                    $(elem).addClass('hide');
+                } else {
                     $(elem).removeClass('hide');
-                });
-            }
-        });
-    } catch (error) {}
+                }
+            });
+        } else {
+            list.each(function (par, elem) {
+                $(elem).removeClass('hide');
+            });
+        }
+    });
 }
 
 function addToDiv(event) {
     const emoji = $(event.target).text();
     const dataId = $(event.target).attr('data-id');
     const chatBox = document.querySelector(".modal-win-text-field");
-    chatBox.focus();
+    // chatBox.focus();
     pasteHtmlAtCaret(`<input disabled type="text" class="li-elem" data-id="${dataId}" value='${emoji}'></input>`);
 }
 
@@ -130,55 +134,68 @@ $body.on('keydown', function (e) {
 })
 
 $textInsert.on('keydown', function (e) {
+    modifyInputs(); // Не работает
     if (e.key === 'Enter') {
         // e.preventDefault();
     }
     if (e.key === '[') {
         e.preventDefault();
         $('.dropMenu').removeClass('active');
+        if (($('.shadow-inp').length < 1)) {
+            let sel, range;
+            if (window.getSelection) {
+                sel = window.getSelection();
+                if (sel.getRangeAt && sel.rangeCount) {
+                    range = sel.getRangeAt(0);
+                    range.deleteContents();
 
-        let sel, range;
-        if (window.getSelection) {
-            // IE9 and non-IE
-            sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                range = sel.getRangeAt(0);
-                range.deleteContents();
+                    const el = document.createElement("div");
+                    // el.classList.add('shadow-inp');
+                    el.type = "text";
+                    el.innerHTML = `<input type="text" class="shadow-inp" name="searchField">`
+                    let frag = document.createDocumentFragment(),
+                        node,
+                        lastNode;
+                    //
+                    // console.log(el);
+                    // $('.shadow-inp').focus();
 
-                const el = document.createElement("div");
-                el.classList.add('shadow-inp');
-                el.type = "text";
-                el.innerHTML = `<input type="text" class="shadow-inp" name="searchField">`
-                let frag = document.createDocumentFragment(),
-                    node,
-                    lastNode;
-                while ((node = el.firstChild)) {
-                    lastNode = frag.appendChild(node);
+                    //
+
+                    while ((node = el.firstChild)) {
+                        if (node !== $('.shadow-inp')[0]) {
+                            lastNode = frag.appendChild(node);
+                        }
+                    }
+                    range.insertNode(frag);
+
+                    if (lastNode) {
+                        range = range.cloneRange();
+                        range.setStartAfter(lastNode);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                    $('.shadow-inp').focus();
+                    setTimeout(() => {
+                        liveSearch();
+                        resizeObserver.observe($shadowInp[0]);
+                    }, 0);
                 }
-                range.insertNode(frag);
-
-                if (lastNode) {
-                    range = range.cloneRange();
-                    range.setStartAfter(lastNode);
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                    liveSearch();
-                    // el.focus();
-                }
+            } else if (document.selection && document.selection.type != "Control") {
+                document.selection.createRange().pasteHTML(html);
             }
-        } else if (document.selection && document.selection.type != "Control") {
-            // IE < 9
-            document.selection.createRange().pasteHTML(html);
+
         }
     }
-    $('.shadow-inp').focus();
+    // $('.shadow-inp').focus();
+    // liveSearch();
 });
 
 $dropMenu.on('click', '.innerElem', function (e) {
     $dropMenu.addClass('active');
     $('.shadow-inp').remove();
-    modifyInputs(); //Не работает!!
+    modifyInputs()
 });
 
 $keyboardImg.on('click', function () {
@@ -193,6 +210,10 @@ $(document).on('click', function (e) {
     if (!$keyboardImg.is(e.target) && !$body.is(e.target) && $body.has(e.target).length === 0) {
         $keyboard.removeClass('keyboardShortcut-active');
     };
+    if ($('.shadow-inp').is(":focus") === false) {
+        $('.shadow-inp').remove();
+        $dropMenu.addClass('active');
+    }
 });
 
 for (const key in masDropMenu) {
@@ -220,10 +241,10 @@ function generateHeaderTitle(key) {
 }
 
 //Подгон дроп меню к блоку с кареткой
-// let resizeObserver = new ResizeObserver(function (param) {
-//     try {
-//         let sizeSpace = $('.shadow-inp').css('top').slice(0, -2);
-//         $dropMenu.css('top', `${sizeSpace - 190}px`);
-//         $('.shadow-inp').css('position', 'sticky');
-//     } catch (error) {}
-// });
+let resizeObserver = new ResizeObserver(function (param) {
+    try {
+        let sizeSpace = $('.shadow-inp').css('top').slice(0, -2);
+        $dropMenu.css('top', `${sizeSpace - 190}px`);
+        $('.shadow-inp').css('position', 'sticky');
+    } catch (error) {}
+});
