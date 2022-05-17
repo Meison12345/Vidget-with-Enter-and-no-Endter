@@ -43,7 +43,6 @@ li {
 
     &-elem {
         cursor: pointer;
-
     }
 }
 
@@ -199,14 +198,12 @@ li {
     width: 35%;
     outline: none;
     border: none;
-    // position: absolute;
-    border-bottom: 1px solid red;
 }
 
 .dropMenu-elem-color {
     pointer-events: none;
 }
 
-.innerElem:hover{
-    background:#efefef; 
+.innerElem:hover {
+    background: #efefef;
 }

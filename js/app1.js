@@ -8,7 +8,6 @@ const $outData = $('#out-data');
 const $keyboard = $('.keyboardShortcut');
 const $body = $('body');
 const $keyboardImg = $('.keyboard');
-const $shadowInp = $(`<input type="text" class="shadow-inp" name="searchField">`);
 const masColor = ['#CCC8F7', '#DCECFF', '#FFF3B4', '#EBFFB5'];
 const masDropMenu = {
     Сделка: {
@@ -67,7 +66,7 @@ function pasteHtmlAtCaret(html) {
 }
 
 function modifyInputs() {
-    $('.modal-win-text-field').find('.li-elem').each((_, el) => {
+    $textInsert.find('.li-elem').each((_, el) => {
         const $current = $(el);
         // const value = $current.attr('data-val');
         $current.css('width', 0);
@@ -81,7 +80,7 @@ function modifyInputs() {
 function liveSearch() {
     $textInsert.on('keyup', function (e) {
         let value = $('.shadow-inp').val();
-        let list = $('.innerElem');
+        let list = $('.searchElem');
         if (value != '') {
             list.each(function (par, elem) {
                 if ($(elem).text().toLowerCase().search(value) == -1) {
@@ -101,15 +100,13 @@ function liveSearch() {
 function addToDiv(event) {
     const emoji = $(event.target).text();
     const dataId = $(event.target).attr('data-id');
-    const chatBox = document.querySelector(".modal-win-text-field");
     pasteHtmlAtCaret(`<input disabled type="text" class="li-elem" data-id="${dataId}" value='${emoji}'></input>`);
-    // chatBox.focus();
 }
 
-function generateEmojiIcon(data, dataAttr) {
+function generateInput(data, dataAttr) {
     const input = document.createElement('input');
     let liElem = document.createElement('li');
-    liElem.classList.add('inp-wrapper');
+    liElem.classList.add('inp-wrapper', 'searchElem');
     liElem.append(input);
     input.type = "button";
     $(input).attr('data-id', dataAttr);
@@ -123,7 +120,7 @@ function generateEmojiIcon(data, dataAttr) {
 $body.on('keydown', function (e) {
     if (e.key === 'Escape') {
         $dropMenu.addClass('active');
-        $('.keyboardShortcut').removeClass('keyboardShortcut-active');
+        $keyboard.removeClass('keyboardShortcut-active');
         $('.shadow-inp').remove();
     }
 })
@@ -212,12 +209,13 @@ for (const key in masDropMenu) {
     for (const value in masDropMenu[key]) {
         const val = value.replace('|', ' → ');
         const dataAttr = (masDropMenu[key][value]);
-        $dropMenuNav.append(generateEmojiIcon(val, dataAttr));
+        $dropMenuNav.append(generateInput(val, dataAttr));
     }
 }
 
-
-
+/**
+ * @description Получение главных позиций
+ */
 function generateHeaderTitle(key) {
     let input = document.createElement('input');
     let liElem = document.createElement('li');
@@ -241,7 +239,7 @@ let resizeObserver = new ResizeObserver(function (param) {
 });
 
 $textInsert.trigger('input');
-$('.modal-win-text-field').on('input', () => {
+$textInsert.on('input', () => {
     $('.spanHide').each((_, el) => {
         const $current = $(el);
         if (!$current.next().hasClass('li-elem')) {
@@ -251,10 +249,9 @@ $('.modal-win-text-field').on('input', () => {
 
     $dropMenuNav.on('click mouseenter', function (e) {
         setTimeout(() => {
-            const val = $('.modal-win-text-field').text();
+            const val = $textInsert.text();
             $('textarea[name="out-data-final"]').val(val);
         }, 0);
-
     });
 
     $('.li-elem').each((_, el) => {
@@ -262,12 +259,11 @@ $('.modal-win-text-field').on('input', () => {
 
         if (!$current.prev().hasClass('spanHide')) {
             const id = $current.attr('data-id');
-            // $current.before(`<span class="spanHide" style="display:none" contenteditable="true">{{${id}}}</span>`);
             $current.before(`<span class="spanHide" style="display:none" contenteditable="true">${id}</span>`);
         }
     });
     setTimeout(() => {
-        const val = $('.modal-win-text-field').text();
+        const val = $textInsert.text();
         $('textarea[name="out-data-final"]').val(val);
 
         modifyInputs();
@@ -277,6 +273,9 @@ $('.modal-win-text-field').on('input', () => {
 
 let i = 0;
 
+/**
+ * @description Установка цветов для главных позиций
+ */
 (function setColor() {
     $('.inp-wrapper-color input').each((_, el) => {
         $(el).css('background', masColor[i]);
@@ -337,7 +336,7 @@ const res = '<p class="text-field">&nbsp;' + exitData.map(el => {
     return createInput(id, name);
 }).join(' ') + '</p>';
 
-$('.modal-win-text-field').html(res);
+$textInsert.html(res);
 modifyInputs();
 
 $textInsert.trigger('input');
