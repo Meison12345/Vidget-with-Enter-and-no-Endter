@@ -138,6 +138,9 @@ $textInsert.on('keydown', function (e) {
     }
     if (e.key === '[') {
         e.preventDefault();
+        if ($keyboard.hasClass('keyboardShortcut-active')) {
+            $keyboard.removeClass('keyboardShortcut-active')
+        }
         $dropMenu.removeClass('active');
         if (($('.shadow-inp').length < 1)) {
             let sel, range;
