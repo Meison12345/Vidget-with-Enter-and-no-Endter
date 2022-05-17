@@ -55,6 +55,7 @@ li {
     border: none;
     outline: none;
     background: white;
+    font-size: 12px;
     cursor: pointer;
 }
 
@@ -84,13 +85,12 @@ li {
 }
 
 .li-elem {
-    padding: 2px 5px;
+    padding: 4px;
     border-radius: 5px;
     margin: 1px 0px;
     outline: none;
     border: 0px;
     text-align: center;
-    // display: inline-block;
 }
 
 .block {
@@ -167,9 +167,6 @@ li {
     font-size: 12px;
 }
 
-// .dropMenu-elem:hover {
-//     background-color: #efefef !important;
-// }
 .dropMenu-elem-hover:hover {
     background-color: #efefef !important;
 }
@@ -210,32 +207,6 @@ li {
     pointer-events: none;
 }
 
-// .dropMenu-nav {
-//     &-elem-color:last-child {
-//         background-color: #DCECFF;
-//     }
-// }
-
-// .dropMenu-elem input:hover .dropMenu-elem-color {
-//     background-color: red;
-// }
-
 .innerElem:hover{
     background:#efefef; 
 }
-
-// li > .dropMenu-elem-color:first-child {
-//     background-color: #CCC8F7;
-// }
-
-// li > .dropMenu-elem-color:nth-child(2) {
-//     background-color: #DCECFF;
-// }
-
-// .dropMenu-elem-color:nth-child(3) {
-//     background-color: #FFF3B4;
-// }
-
-// .dropMenu-elem-color:last-child {
-//     background-color: #EBFFB5;
-// }

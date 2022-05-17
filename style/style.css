@@ -57,6 +57,7 @@ li {
   border: none;
   outline: none;
   background: white;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -86,7 +87,7 @@ li {
 }
 
 .li-elem {
-  padding: 2px 5px;
+  padding: 4px;
   border-radius: 5px;
   margin: 1px 0px;
   outline: none;

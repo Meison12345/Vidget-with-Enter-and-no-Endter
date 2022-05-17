@@ -38,7 +38,6 @@ let lastActiveNode;
 function pasteHtmlAtCaret(html) {
     let sel, range;
     if (window.getSelection) {
-        // IE9 and non-IE
         sel = window.getSelection();
         if (sel.getRangeAt && sel.rangeCount) {
             range = sel.getRangeAt(0);
@@ -53,7 +52,6 @@ function pasteHtmlAtCaret(html) {
                 lastNode = frag.appendChild(node);
             }
             $('.shadow-inp').focus();
-            // console.log(el, el.firstChild, frag, node, lastNode);
             range.insertNode(frag);
             if (lastNode) {
                 range = range.cloneRange();
@@ -64,7 +62,6 @@ function pasteHtmlAtCaret(html) {
             }
         }
     } else if (document.selection && document.selection.type != "Control") {
-        // IE < 9
         document.selection.createRange().pasteHTML(html);
     }
 }
@@ -75,9 +72,6 @@ function modifyInputs() {
         // const value = $current.attr('data-val');
         $current.css('width', 0);
         // $current.attr('value', value);
-        // console.log($current.css('width'));
-        console.log(el.scrollWidth);
-
         $current.css('width', (el.scrollWidth) + 'px');
     });
 }
@@ -85,9 +79,10 @@ function modifyInputs() {
  * @description Живой поиск принажатии на '[' 
  */
 function liveSearch() {
-    $textInsert.on('keydown', function (e) {
+    $textInsert.on('keyup', function (e) {
         let value = $('.shadow-inp').val();
         let list = $('.innerElem');
+        console.log(value);
         if (value != '') {
             list.each(function (par, elem) {
                 if ($(elem).text().toLowerCase().search(value) == -1) {
@@ -108,18 +103,19 @@ function addToDiv(event) {
     const emoji = $(event.target).text();
     const dataId = $(event.target).attr('data-id');
     const chatBox = document.querySelector(".modal-win-text-field");
-    // chatBox.focus();
     pasteHtmlAtCaret(`<input disabled type="text" class="li-elem" data-id="${dataId}" value='${emoji}'></input>`);
+    // chatBox.focus();
 }
 
-function generateEmojiIcon(emoji) {
+function generateEmojiIcon(data, dataAttr) {
     const input = document.createElement('input');
     let liElem = document.createElement('li');
     liElem.classList.add('inp-wrapper');
     liElem.append(input);
     input.type = "button";
-    input.value = emoji;
-    input.innerText = emoji;
+    $(input).attr('data-id', dataAttr);
+    input.value = data;
+    input.innerText = data;
     input.classList.add('innerElem');
     input.addEventListener("click", addToDiv);
     return liElem;
@@ -134,9 +130,9 @@ $body.on('keydown', function (e) {
 })
 
 $textInsert.on('keydown', function (e) {
-    modifyInputs(); // Не работает
+    modifyInputs();
     if (e.key === 'Enter') {
-        // e.preventDefault();
+        e.preventDefault();
     }
     if (e.key === '[') {
         e.preventDefault();
@@ -148,27 +144,18 @@ $textInsert.on('keydown', function (e) {
                 if (sel.getRangeAt && sel.rangeCount) {
                     range = sel.getRangeAt(0);
                     range.deleteContents();
-
                     const el = document.createElement("div");
-                    // el.classList.add('shadow-inp');
                     el.type = "text";
-                    el.innerHTML = `<input type="text" class="shadow-inp" name="searchField">`
+                    el.innerHTML = `<input type="text" class="shadow-inp" name="searchField" style="position:absolute;">`
                     let frag = document.createDocumentFragment(),
                         node,
                         lastNode;
-                    //
-                    // console.log(el);
-                    // $('.shadow-inp').focus();
-
-                    //
-
                     while ((node = el.firstChild)) {
                         if (node !== $('.shadow-inp')[0]) {
                             lastNode = frag.appendChild(node);
                         }
                     }
                     range.insertNode(frag);
-
                     if (lastNode) {
                         range = range.cloneRange();
                         range.setStartAfter(lastNode);
@@ -177,25 +164,25 @@ $textInsert.on('keydown', function (e) {
                         sel.addRange(range);
                     }
                     $('.shadow-inp').focus();
-                    setTimeout(() => {
+                    // setTimeout(() => {
                         liveSearch();
-                        resizeObserver.observe($shadowInp[0]);
-                    }, 0);
+                        resizeObserver.observe($('.shadow-inp')[0]);
+                    // }, 0);
                 }
             } else if (document.selection && document.selection.type != "Control") {
                 document.selection.createRange().pasteHTML(html);
             }
-
         }
     }
-    // $('.shadow-inp').focus();
-    // liveSearch();
 });
 
 $dropMenu.on('click', '.innerElem', function (e) {
+    const $current = e.currentTarget;
+    console.log(e.currentTarget);
     $dropMenu.addClass('active');
+    $('.shadow-inp').before($(`<span class="spanHide" style="display:none" contenteditable="false">${$($current).attr('data-id')}</span>`));
     $('.shadow-inp').remove();
-    modifyInputs()
+    modifyInputs();
 });
 
 $keyboardImg.on('click', function () {
@@ -220,8 +207,8 @@ for (const key in masDropMenu) {
     $('.dropMenu-nav').append(generateHeaderTitle(key));
     for (const value in masDropMenu[key]) {
         const val = value.replace('|', ' → ');
-
-        $('.dropMenu-nav').append(generateEmojiIcon(val));
+        const dataAttr = (masDropMenu[key][value]);
+        $('.dropMenu-nav').append(generateEmojiIcon(val, dataAttr));
     }
 }
 
@@ -248,3 +235,123 @@ let resizeObserver = new ResizeObserver(function (param) {
         $('.shadow-inp').css('position', 'sticky');
     } catch (error) {}
 });
+
+$textInsert.trigger('input');
+$('.modal-win-text-field').on('input', () => {
+    $('.spanHide').each((_, el) => {
+        const $current = $(el);
+        if (!$current.next().hasClass('li-elem')) {
+            $current.remove();
+        }
+    });
+
+    $('.dropMenu-nav').on('click mouseenter', function (e) {
+        setTimeout(() => {
+            const val = $('.modal-win-text-field').text();
+            $('textarea[name="out-data-final"]').val(val);
+        }, 0);
+
+    });
+
+    $('.li-elem').each((_, el) => {
+        const $current = $(el);
+
+        if (!$current.prev().hasClass('spanHide')) {
+            const id = $current.attr('data-id');
+            // $current.before(`<span class="spanHide" style="display:none" contenteditable="true">{{${id}}}</span>`);
+            $current.before(`<span class="spanHide" style="display:none" contenteditable="true">${id}</span>`);
+        }
+    });
+    setTimeout(() => {
+        const val = $('.modal-win-text-field').text();
+        $('textarea[name="out-data-final"]').val(val);
+
+        modifyInputs();
+    }, 0);
+
+});
+
+let i = 0;
+
+(function setColor() {
+    $('.inp-wrapper-color input').each((_, el) => {
+        $(el).css('background', masColor[i]);
+        i++;
+    });
+})();
+
+
+
+
+
+
+// TODO:
+// const exitData = 'asd {{lead.responsible.name}} asd asd {{contact.phone}} {{contact.phone}} {{contact.phone}} asd asd {{contact.responsible.name}} jkl '.split(' ');
+const exitData = ''.split(' ');
+const reg = /\{\{[A-Za-z.1-9]+\}\}/mi;
+const values = {
+    Сделка: {
+        'Сделка|Ответственный': '{{lead.responsible.name}}',
+        'Сделка|Бюджет': '{{lead.price}}',
+    },
+    Контакт: {
+        'Контакт|Ответственный': '{{contact.responsible.name}}',
+        'Контакт|Имя': '{{contact.name}}',
+        'Контакт|Почта': '{{contact.email}}',
+        'Контакт|Телефон': '{{contact.phone}}'
+    },
+    Компания: {
+        'Компания|Ответственный': '{{company.responsible.name}}',
+        'Компания|Название': '{{company.name}}',
+        'Компания|Почта': '{{company.email}}',
+        'Компания|Телефон': '{{company.phone}}'
+    },
+    Системное: {
+        'Покупатель|Ответственный': '{{customer.responsible.name}}'
+    }
+}
+
+const res = '<p class="text-field">&nbsp;' + exitData.map(el => {
+    if (!reg.test(el)) {
+        return el;
+    }
+    const id = el.replace(/\{\{|\}\}/g, '');
+    for (let el in values) {
+        for (let key in values[el]) {
+            // console.log(values[el][key])
+            var item = values[el][key];
+        }
+    }
+    if (!item) return el;
+    for (let elem in values) {
+        for (let key in values[elem]) {
+            // key = key.replace('|', ' → ');
+            if (el == values[elem][key]) {
+                var name = key.replace('|', ' → ');;
+                console.log(values[elem][key]);
+            }
+        }
+    }
+    return createInput(id, name);
+}).join(' ') + '</p>';
+
+$('.modal-win-text-field').html(res);
+modifyInputs();
+
+$('.modal-win-text-field').trigger('input');
+//
+
+
+function createInput(id, name) {
+    return `<span class="spanHide" style="display:none" contenteditable="true">{{${id}}}</span><input type="text" class="li-elem" name="searchField" data-id="{{${id}}}" value="${name}" disabled data-val="${name}">`;
+}
+
+// function modifyInputs() {
+//     $('.modal-win-text-field').find('input').each((_, el) => {
+//         const $current = $(el);
+//         const value = $current.attr('data-val');
+
+//         $current.attr('value', value);
+//         $current.css('width', (el.scrollWidth) + 'px');
+//     });
+// }
